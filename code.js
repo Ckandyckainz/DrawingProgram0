@@ -1,4 +1,5 @@
 // https://www.w3schools.com/tags/tag_select.asp
+// https://www.w3schools.com/jsref/met_console_time.asp
 
 let mcan = document.getElementById("mcan");
 mcan.width = 500;
@@ -102,19 +103,21 @@ mcan.addEventListener("click", (event)=>{
         let index = (event.offsetY*mcan.width+event.offsetX)*4
         let colorToReplace = [mctxImgdt.data[index], mctxImgdt.data[index+1], mctxImgdt.data[index+2]];
         let pixelsToReplace = [];
-        pixelsToReplace.push([index, true]);
+        pixelsToReplace.push(index);
         let done = false;
+        let pixelsCheckStartIndex = 0;
+        let mcanw4 = mcan.width*4;
+        let mctxImgdtDataLength = mctxImgdt.data.length;
         while (!done) {
             done = true;
             let pixelsToReplaceLength = pixelsToReplace.length;
-            for (let i=0; i<pixelsToReplaceLength; i++) {
-                if (pixelsToReplace[i][1]) {
-                    done = false;
-                    index = pixelsToReplace[i][0];
-                    let indices = [index+4, index-4, index+mcan.width*4, index-mcan.width*4];
+            for (let i=pixelsCheckStartIndex; i<pixelsToReplaceLength; i++) {
+                done = false;
+                    index = pixelsToReplace[i];
+                    let indices = [index+4, index-4, index+mcanw4, index-mcanw4];
                     for (let j=0; j<indices.length; j++) {
                         let ind = indices[j];
-                        if (ind > -1 && ind < mctxImgdt.data.length) {
+                        if (ind > -1 && ind < mctxImgdtDataLength) {
                             let sameColor = true;
                             for (let k=0; k<3; k++) {
                                 if (mctxImgdt.data[ind+k] != colorToReplace[k]) {
@@ -124,28 +127,32 @@ mcan.addEventListener("click", (event)=>{
                             if (sameColor) {
                                 let hasIndex = false;
                                 for (let k=0; k<pixelsToReplace.length; k++) {
-                                    if (pixelsToReplace[k][0] == ind) {
+                                    if (pixelsToReplace[k] == ind) {
                                         hasIndex = true;
                                     }
                                 }
                                 if (!hasIndex) {
-                                    pixelsToReplace.push([ind, true]);
+                                    pixelsToReplace.push(ind);
                                 }
                             }
                         }
                     }
-                }
-                pixelsToReplace[i][1] = false;
             }
+            pixelsCheckStartIndex = pixelsToReplaceLength;
+        }
+        let int = parseInt(brushColor.value.substring(1), 16);
+        let fillColor = [];
+        for (let i=0; i<3; i++) {
+            fillColor.push(int%256);
+            int /= 256;
         }
         for (let i=0; i<pixelsToReplace.length; i++) {
-            index = pixelsToReplace[i][0];
-            newImgdt.data[index] = 0;
-            newImgdt.data[index+1] = 0;
-            newImgdt.data[index+2] = 255;
+            index = pixelsToReplace[i];
+            newImgdt.data[index] = fillColor[2];
+            newImgdt.data[index+1] = fillColor[1];
+            newImgdt.data[index+2] = fillColor[0];
             newImgdt.data[index+3] = 255;
         }
-        console.log(newImgdt);
         mctx.putImageData(newImgdt, 0, 0);
     }
 });
