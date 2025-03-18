@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body{
+                margin: 0;
+                padding: 0;
+            }
+            div{
+                margin: 0;
+                padding: 0;
+            }
+            #settingsdiv{
+                width: 20%;
+                height: 100%;
+                background-color: lightgray;
+                float: left;
+            }
+            #mcancontainer{
+                background-color: darkgray;
+                width: 80%;
+                height: 600px;
+                float: left;
+                overflow: scroll;
+            }
+            #mcan{
+                margin: 100px;
+                padding: 0;
+                width: 500px;
+                height: 500px;
+                float: left;
+                border: solid 1px black;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="containerdiv">
+            <div id="mcancontainer">
+                <canvas id="mcan"></canvas>
+            </div>
+            <div id="settingsdiv">
+                <label for="tooldropdown">Tool:</label>
+                <select id="tooldropdown">
+                    <option value="paintbrush">Paintbrush</option>
+                    <option value="paintbucket">Paint Bucket</option>
+                </select>
+            </div>
+        </div>
+        <script src="code.js"></script>
+    </body>
+</html>
