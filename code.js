@@ -124,7 +124,14 @@ mcan.addEventListener("click", (event)=>{
             for (let i=pixelsCheckStartIndex; i<pixelsToReplaceLength; i++) {
                 done = false;
                     index = pixelsToReplace[i];
-                    let indices = [index+4, index-4, index+mcanw4, index-mcanw4];
+                    let indices = [index+mcanw4, index-mcanw4];
+                    let indexX = (index/4)%mcan.width;
+                    if (indexX != 0) {
+                        indices.push(index-4);
+                    }
+                    if (indexX != mcan.width-1) {
+                        indices.push(index+4);
+                    }
                     for (let j=0; j<indices.length; j++) {
                         let ind = indices[j];
                         if (ind > -1 && ind < mctxImgdtDataLength) {
