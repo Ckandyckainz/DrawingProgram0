@@ -5,6 +5,8 @@ let mcan = document.getElementById("mcan");
 mcan.width = 500;
 mcan.height = 500;
 let mctx = mcan.getContext("2d", {willReadFrequently: true});
+mctx.fillStyle = "white";
+mctx.fillRect(0, 0, mcan.width, mcan.height);
 let mcanContainer = document.getElementById("mcancontainer");
 let settingsDiv = document.getElementById("settingsdiv");
 
@@ -56,11 +58,15 @@ let canvasWidth = {value: 500};
 createInputPalette("Canvas Width:", settingsDiv, canvasWidth, "text", 1, ["500"], ()=>{
     mcan.width = canvasWidth.value;
     mcan.style.width = canvasWidth.value+"px";
+    mctx.fillStyle = "white";
+    mctx.fillRect(0, 0, mcan.width, mcan.height);
 });
 let canvasHeight = {value: 500};
 createInputPalette("Canvas Height:", settingsDiv, canvasHeight, "text", 1, ["500"], ()=>{
     mcan.height = canvasHeight.value;
     mcan.style.height = canvasHeight.value+"px";
+    mctx.fillStyle = "white";
+    mctx.fillRect(0, 0, mcan.width, mcan.height);
 });
 let canvasZoom = {value: 1};
 createInputPalette("Zoom:", settingsDiv, canvasZoom, "range", 1, [1], ()=>{
@@ -77,21 +83,25 @@ createInputPalette("Line Smoothness:", settingsDiv, lineSmoothness, "text", 1, [
 let thickerCurveBrushOn = {value: false};
 createOnOffButton("Thicker Curve Brush", settingsDiv, thickerCurveBrushOn);
 
-
 let keysDown = [];
 let mcanStates = [];
 let pointsToDraw = [];
 let isDrawing = false;
+let drawingStraightLine = false;
 
 mcan.addEventListener("click", (event)=>{
     if (toolDropdown.value == "paintbrush") {
         isDrawing = !isDrawing;
         if (isDrawing) {
             mcanStates.push(mctx.getImageData(0, 0, mcan.width, mcan.height));
-            pointsToDraw = [];
-        } else if (redrawLinesOn.value) {
-            mctx.putImageData(mcanStates[mcanStates.length-1], 0, 0);
-            drawLine(pointsToDraw, lineSmoothness.value);
+            drawingStraightLine = arrayHasItem(keysDown, "Shift");
+            pointsToDraw = [[event.offsetX, event.offsetY]];
+        } else {
+            drawingStraightLine = false;
+            if (redrawLinesOn.value) {
+                mctx.putImageData(mcanStates[mcanStates.length-1], 0, 0);
+                drawLine(pointsToDraw, lineSmoothness.value);
+            }
         }
     } else if (toolDropdown.value == "paintbucket") {
         let mctxImgdt = mctx.getImageData(0, 0, mcan.width, mcan.height);
@@ -159,9 +169,13 @@ mcan.addEventListener("click", (event)=>{
 
 mcan.addEventListener("mousemove", (event)=>{
     if (isDrawing) {
-        pointsToDraw.push([event.offsetX, event.offsetY]);
-        if (pointsToDraw.length > 1) {
-            drawLine(pointsToDraw.slice(), lineSmoothness.value*thickerCurveBrushOn.value);
+        if (drawingStraightLine) {
+            pointsToDraw[1] = [event.offsetX, event.offsetY];
+        } else {
+            pointsToDraw.push([event.offsetX, event.offsetY]);
+            if (pointsToDraw.length > 1) {
+                drawLine(pointsToDraw.slice(), lineSmoothness.value*thickerCurveBrushOn.value);
+            }
         }
     }
 });
@@ -186,7 +200,10 @@ document.addEventListener("keyup", (event)=>{
 });
 
 function drawingLoop(){
-
+    if (drawingStraightLine) {
+        mctx.putImageData(mcanStates[mcanStates.length-1], 0, 0);
+        drawLine(pointsToDraw.slice(), 0);
+    }
     requestAnimationFrame(drawingLoop);
 }
 drawingLoop();
